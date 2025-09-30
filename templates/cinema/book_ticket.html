@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Бронирование билета - КиноМир{% endblock %}
+
+{% block extra_css %}
+<style>
+    .seat {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 5px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .seat.available {
+        background: var(--surface-light);
+        border: 2px solid var(--primary-color);
+        color: var(--text-primary);
+    }
+    
+    .seat.available:hover {
+        background: var(--primary-color);
+        transform: scale(1.1);
+    }
+    
+    .seat.booked {
+        background: var(--surface);
+        border: 2px solid var(--danger);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+    
+    .seat.selected {
+        background: var(--success);
+        border: 2px solid var(--success);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .screen {
+        background: linear-gradient(to bottom, rgba(99, 102, 241, 0.3), transparent);
+        border-radius: 50%;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        border: 2px solid var(--primary-color);
+    }
+    
+    .row-number {
+        display: inline-block;
+        width: 40px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="fw-bold mb-3">{{ showtime.movie.title }}</h4>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Кинотеатр</div>
+                        <div class="fw-bold">{{ showtime.hall.cinema.name }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Зал</div>
+                        <div class="fw-bold">{{ showtime.hall.name }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Дата и время</div>
+                        <div class="fw-bold">{{ showtime.start_time|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Цена</div>
+                        <div class="fw-bold">{{ showtime.price }} ₽</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="screen mb-4">
+                    <strong><i class="bi bi-display"></i> ЭКРАН</strong>
+                </div>
+                
+                <div class="text-center mb-4">
+                    {% for row_seats in seats %}
+                        <div class="mb-2">
+                            <span class="row-number">{{ row_seats.0.row }}</span>
+                            {% for seat in row_seats %}
+                                <div class="seat {% if seat.is_booked %}booked{% else %}available{% endif %}" 
+                                     data-row="{{ seat.row }}" 
+                                     data-seat="{{ seat.seat }}"
+                                     {% if not seat.is_booked %}onclick="selectSeat(this)"{% endif %}>
+                                    {{ seat.seat }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Legend -->
+                <div class="d-flex justify-content-center gap-4 mt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="seat available" style="cursor: default;"></div>
+                        <span class="text-secondary small">Свободно</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="seat selected" style="cursor: default;"></div>
+                        <span class="text-secondary small">Выбрано</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="seat booked" style="cursor: default;"></div>
+                        <span class="text-secondary small">Занято</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card sticky-top" style="top: 100px;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Ваш заказ</h5>
+                
+                <div id="selectedInfo" class="mb-3">
+                    <p class="text-secondary">Выберите место</p>
+                </div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Цена билета:</span>
+                    <strong id="totalPrice">0 ₽</strong>
+                </div>
+                
+                <form method="post" id="bookingForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="row" id="selectedRow">
+                    <input type="hidden" name="seat" id="selectedSeat">
+                    
+                    <button type="submit" class="btn btn-primary w-100" id="bookButton" disabled>
+                        <i class="bi bi-ticket-perforated"></i> Купить билет
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedSeat = null;
+
+function selectSeat(element) {
+    // Remove previous selection
+    if (selectedSeat) {
+        selectedSeat.classList.remove('selected');
+        selectedSeat.classList.add('available');
+    }
+    
+    // Select new seat
+    element.classList.remove('available');
+    element.classList.add('selected');
+    selectedSeat = element;
+    
+    // Update form
+    const row = element.dataset.row;
+    const seat = element.dataset.seat;
+    document.getElementById('selectedRow').value = row;
+    document.getElementById('selectedSeat').value = seat;
+    
+    // Update UI
+    document.getElementById('selectedInfo').innerHTML = 
+        `<p class="mb-1"><strong>Ряд:</strong> ${row}</p>
+         <p class="mb-1"><strong>Место:</strong> ${seat}</p>`;
+    document.getElementById('totalPrice').textContent = '{{ showtime.price }} ₽';
+    document.getElementById('bookButton').disabled = false;
+}
+</script>
+{% endblock %}

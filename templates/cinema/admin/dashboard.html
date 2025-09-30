@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Админ-панель - КиноМир{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold"><i class="bi bi-gear"></i> Админ-панель</h1>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-people text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ total_users }}</h3>
+                <p class="text-secondary mb-0">Пользователей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-film text-success" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ total_movies }}</h3>
+                <p class="text-secondary mb-0">Активных фильмов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-building text-warning" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ total_cinemas }}</h3>
+                <p class="text-secondary mb-0">Кинотеатров</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-ticket-perforated text-danger" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ today_tickets }}</h3>
+                <p class="text-secondary mb-0">Билетов сегодня</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Links -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_movies' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-film text-primary" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление фильмами</h5>
+                <p class="text-secondary small">Добавление, редактирование и удаление фильмов</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_showtimes' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-check text-success" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление сеансами</h5>
+                <p class="text-secondary small">Создание и редактирование расписания</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_cinemas' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-building text-warning" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление кинотеатрами</h5>
+                <p class="text-secondary small">Редактирование информации о кинотеатрах</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_halls' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-grid-3x3-gap text-danger" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление залами</h5>
+                <p class="text-secondary small">Конфигурация залов и мест</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_promotions' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-gift text-primary" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление акциями</h5>
+                <p class="text-secondary small">Создание и редактирование акций</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_rules' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-info-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление правилами</h5>
+                <p class="text-secondary small">Редактирование правил кинотеатра</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'cinema:admin_users' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people text-warning" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление пользователями</h5>
+                <p class="text-secondary small">Просмотр и изменение ролей пользователей</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'cinema:admin_analytics' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up text-danger" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Аналитика и отчеты</h5>
+                <p class="text-secondary small">Статистика продаж и популярности</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Tickets -->
+{% if recent_tickets %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="fw-bold mb-0">Последние билеты</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Пользователь</th>
+                        <th>Фильм</th>
+                        <th>Сеанс</th>
+                        <th>Место</th>
+                        <th>Цена</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in recent_tickets %}
+                    <tr>
+                        <td>{{ ticket.id }}</td>
+                        <td>{{ ticket.user.username }}</td>
+                        <td>{{ ticket.showtime.movie.title }}</td>
+                        <td>{{ ticket.showtime.start_time|date:"d.m H:i" }}</td>
+                        <td>Р{{ ticket.row }} М{{ ticket.seat }}</td>
+                        <td>{{ ticket.price }} ₽</td>
+                        <td>
+                            <span class="badge 
+                                {% if ticket.status == 'paid' %}bg-success
+                                {% elif ticket.status == 'booked' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ ticket.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ ticket.booking_date|date:"d.m H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if pending_reviews > 0 %}
+<div class="alert alert-warning mt-4">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Внимание!</strong> {{ pending_reviews }} отзывов ожидают модерации.
+</div>
+{% endif %}
+{% endblock %}
