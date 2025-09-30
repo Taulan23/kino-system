@@ -1196,3 +1196,75 @@ def admin_analytics(request):
         'total_tickets': total_tickets,
     }
     return render(request, 'cinema/admin/analytics.html', context)
+
+
+@admin_required
+def admin_tickets(request):
+    """Управление билетами"""
+    from django.core.paginator import Paginator
+    
+    # Фильтры
+    tickets = Ticket.objects.select_related('user', 'showtime__movie', 'showtime__hall__cinema').all()
+    
+    # Фильтр по пользователю
+    user_query = request.GET.get('user')
+    if user_query:
+        tickets = tickets.filter(
+            Q(user__username__icontains=user_query) |
+            Q(user__email__icontains=user_query)
+        )
+    
+    # Фильтр по фильму
+    movie_id = request.GET.get('movie')
+    if movie_id:
+        tickets = tickets.filter(showtime__movie_id=movie_id)
+    
+    # Фильтр по статусу
+    status = request.GET.get('status')
+    if status:
+        tickets = tickets.filter(status=status)
+    
+    # Фильтр по дате
+    date_str = request.GET.get('date')
+    if date_str:
+        from datetime import datetime
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            tickets = tickets.filter(booking_date__date=selected_date)
+        except ValueError:
+            pass
+    
+    # Сортировка
+    tickets = tickets.order_by('-booking_date')
+    
+    # Пагинация (50 билетов на страницу)
+    paginator = Paginator(tickets, 50)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    # Список фильмов для фильтра
+    movies = Movie.objects.filter(is_active=True).order_by('title')
+    
+    context = {
+        'tickets': page_obj,
+        'page_obj': page_obj,
+        'movies': movies,
+        'total_count': paginator.count,
+        'now': timezone.now(),
+    }
+    return render(request, 'cinema/admin/tickets.html', context)
+
+
+@admin_required
+def admin_ticket_cancel(request, pk):
+    """Отмена билета администратором"""
+    ticket = get_object_or_404(Ticket, pk=pk)
+    
+    if ticket.status == 'cancelled':
+        messages.warning(request, 'Билет уже отменен.')
+    else:
+        ticket.status = 'cancelled'
+        ticket.save()
+        messages.success(request, f'Билет #{ticket.id} успешно отменен!')
+    
+    return redirect('cinema:admin_tickets')

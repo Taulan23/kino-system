@@ -103,7 +103,16 @@
             </div>
         </a>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
+        <a href="{% url 'cinema:admin_tickets' %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-ticket-perforated text-info" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold mt-3">Управление билетами</h5>
+                <p class="text-secondary small">Просмотр и отмена билетов</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
         <a href="{% url 'cinema:admin_users' %}" class="card text-decoration-none h-100">
             <div class="card-body text-center">
                 <i class="bi bi-people text-warning" style="font-size: 3rem;"></i>

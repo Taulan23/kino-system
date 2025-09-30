@@ -99,6 +99,10 @@ urlpatterns = [
     path('admin-panel/user/<int:pk>/reset-password/', views.admin_user_reset_password, name='admin_user_reset_password'),
     path('admin-panel/user/<int:pk>/delete/', views.admin_user_delete, name='admin_user_delete'),
     
+    # Управление билетами
+    path('admin-panel/tickets/', views.admin_tickets, name='admin_tickets'),
+    path('admin-panel/ticket/<int:pk>/cancel/', views.admin_ticket_cancel, name='admin_ticket_cancel'),
+    
     # Аналитика
     path('admin-panel/analytics/', views.admin_analytics, name='admin_analytics'),
 ]
