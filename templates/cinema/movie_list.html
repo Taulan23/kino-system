@@ -26,23 +26,37 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Сортировка</label>
                 <select name="sort" class="form-select">
-                    <option value="-created_at">Новые</option>
-                    <option value="title">По названию</option>
-                    <option value="-rating">По рейтингу</option>
-                    <option value="release_date">По дате выхода</option>
+                    <option value="-created_at" {% if request.GET.sort == '-created_at' or not request.GET.sort %}selected{% endif %}>Новые</option>
+                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>По названию</option>
+                    <option value="-rating" {% if request.GET.sort == '-rating' %}selected{% endif %}>По рейтингу</option>
+                    <option value="release_date" {% if request.GET.sort == 'release_date' %}selected{% endif %}>По дате выхода</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
                     <i class="bi bi-search"></i> Найти
                 </button>
+                <a href="{% url 'cinema:movie_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Сбросить
+                </a>
             </div>
         </form>
     </div>
 </div>
+
+<!-- Search Results Info -->
+{% if search_query or selected_genre %}
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle"></i>
+    Найдено фильмов: <strong>{{ movies.count }}</strong>
+    {% if search_query %}
+        по запросу "<strong>{{ search_query }}</strong>"
+    {% endif %}
+</div>
+{% endif %}
 
 <!-- Movies Grid -->
 {% if movies %}
