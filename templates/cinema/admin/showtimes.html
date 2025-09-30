@@ -10,6 +10,63 @@
     </a>
 </div>
 
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Фильм</label>
+                <select name="movie" class="form-select">
+                    <option value="">Все фильмы</option>
+                    {% for movie in movies %}
+                        <option value="{{ movie.id }}" {% if request.GET.movie == movie.id|stringformat:'s' %}selected{% endif %}>
+                            {{ movie.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Кинотеатр</label>
+                <select name="cinema" class="form-select">
+                    <option value="">Все кинотеатры</option>
+                    {% for cinema in cinemas %}
+                        <option value="{{ cinema.id }}" {% if request.GET.cinema == cinema.id|stringformat:'s' %}selected{% endif %}>
+                            {{ cinema.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Дата</label>
+                <input type="date" name="date" class="form-control" value="{{ request.GET.date }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Активные</option>
+                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Неактивные</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-search"></i> Найти
+                </button>
+                <a href="{% url 'cinema:admin_showtimes' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results info -->
+{% if total_count %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Найдено сеансов: <strong>{{ total_count }}</strong>
+</div>
+{% endif %}
+
 <div class="card">
     <div class="card-body">
         {% if showtimes %}
@@ -57,9 +114,48 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Навигация по страницам">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.movie %}&movie={{ request.GET.movie }}{% endif %}{% if request.GET.cinema %}&cinema={{ request.GET.cinema }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                Первая
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.movie %}&movie={{ request.GET.movie }}{% endif %}{% if request.GET.cinema %}&cinema={{ request.GET.cinema }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                Назад
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.movie %}&movie={{ request.GET.movie }}{% endif %}{% if request.GET.cinema %}&cinema={{ request.GET.cinema }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                Вперед
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.movie %}&movie={{ request.GET.movie }}{% endif %}{% if request.GET.cinema %}&cinema={{ request.GET.cinema }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                Последняя
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         {% else %}
             <div class="alert alert-info mb-0">
-                <i class="bi bi-info-circle"></i> Сеансов пока нет. Добавьте первый сеанс.
+                <i class="bi bi-info-circle"></i> Сеансов не найдено.
             </div>
         {% endif %}
     </div>

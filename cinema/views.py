@@ -699,10 +699,56 @@ def admin_movie_delete(request, pk):
 @admin_required
 def admin_showtimes(request):
     """Управление сеансами"""
-    showtimes = ShowTime.objects.all().order_by('-start_time')
+    from django.core.paginator import Paginator
+    
+    # Фильтры
+    showtimes = ShowTime.objects.select_related('movie', 'hall', 'hall__cinema').all()
+    
+    # Фильтр по фильму
+    movie_id = request.GET.get('movie')
+    if movie_id:
+        showtimes = showtimes.filter(movie_id=movie_id)
+    
+    # Фильтр по кинотеатру
+    cinema_id = request.GET.get('cinema')
+    if cinema_id:
+        showtimes = showtimes.filter(hall__cinema_id=cinema_id)
+    
+    # Фильтр по дате
+    date_str = request.GET.get('date')
+    if date_str:
+        from datetime import datetime
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            showtimes = showtimes.filter(start_time__date=selected_date)
+        except ValueError:
+            pass
+    
+    # Фильтр по статусу
+    status = request.GET.get('status')
+    if status == 'active':
+        showtimes = showtimes.filter(is_active=True)
+    elif status == 'inactive':
+        showtimes = showtimes.filter(is_active=False)
+    
+    # Сортировка
+    showtimes = showtimes.order_by('-start_time')
+    
+    # Пагинация (50 сеансов на страницу)
+    paginator = Paginator(showtimes, 50)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    # Список фильмов и кинотеатров для фильтров
+    movies = Movie.objects.filter(is_active=True).order_by('title')
+    cinemas = Cinema.objects.filter(is_active=True).order_by('name')
     
     context = {
-        'showtimes': showtimes,
+        'showtimes': page_obj,
+        'page_obj': page_obj,
+        'movies': movies,
+        'cinemas': cinemas,
+        'total_count': paginator.count,
     }
     return render(request, 'cinema/admin/showtimes.html', context)
 
