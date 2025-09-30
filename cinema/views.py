@@ -368,10 +368,13 @@ def change_password(request):
 @login_required
 def my_tickets(request):
     """Мои билеты"""
-    tickets = Ticket.objects.filter(user=request.user).order_by('-booking_date')
+    tickets = Ticket.objects.filter(user=request.user).select_related(
+        'showtime__movie', 'showtime__hall__cinema'
+    ).order_by('-booking_date')
     
     context = {
         'tickets': tickets,
+        'now': timezone.now(),
     }
     return render(request, 'cinema/my_tickets.html', context)
 
