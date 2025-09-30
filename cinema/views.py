@@ -461,7 +461,18 @@ def book_ticket(request, pk):
 @login_required
 def cancel_ticket(request, pk):
     """Отмена билета"""
+    # Проверка метода запроса
+    if request.method != 'POST':
+        messages.error(request, 'Неверный метод запроса.')
+        return redirect('cinema:my_tickets')
+    
+    # Получаем билет только если он принадлежит текущему пользователю
     ticket = get_object_or_404(Ticket, pk=pk, user=request.user)
+    
+    # Проверяем, что билет еще можно отменить
+    if ticket.status == 'cancelled':
+        messages.warning(request, 'Билет уже отменен.')
+        return redirect('cinema:my_tickets')
     
     # Проверяем, что до сеанса осталось хотя бы 1 час
     if ticket.showtime.start_time - timezone.now() < timedelta(hours=1):
@@ -470,7 +481,7 @@ def cancel_ticket(request, pk):
     
     ticket.status = 'cancelled'
     ticket.save()
-    messages.success(request, 'Билет успешно отменен.')
+    messages.success(request, f'Билет #{ticket.id} успешно отменен. Возврат средств будет произведен в течение 3-5 рабочих дней.')
     return redirect('cinema:my_tickets')
 
 
