@@ -1258,13 +1258,18 @@ def admin_tickets(request):
 @admin_required
 def admin_ticket_cancel(request, pk):
     """Отмена билета администратором"""
+    if request.method != 'POST':
+        messages.error(request, 'Неверный метод запроса.')
+        return redirect('cinema:admin_tickets')
+    
     ticket = get_object_or_404(Ticket, pk=pk)
     
     if ticket.status == 'cancelled':
         messages.warning(request, 'Билет уже отменен.')
     else:
+        old_status = ticket.get_status_display()
         ticket.status = 'cancelled'
         ticket.save()
-        messages.success(request, f'Билет #{ticket.id} успешно отменен!')
+        messages.success(request, f'Билет #{ticket.id} пользователя {ticket.user.username} успешно отменен! (был: {old_status})')
     
     return redirect('cinema:admin_tickets')

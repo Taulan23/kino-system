@@ -101,10 +101,13 @@
                             </td>
                             <td>
                                 {% if ticket.status != 'cancelled' %}
-                                    <button onclick="if(confirm('Отменить билет #{{ ticket.id }}?')) location.href='{% url 'cinema:admin_ticket_cancel' ticket.id %}'" 
-                                            class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-x-circle"></i> Отменить
-                                    </button>
+                                    <form method="post" action="{% url 'cinema:admin_ticket_cancel' ticket.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Отменить билет #{{ ticket.id }} пользователя {{ ticket.user.username }}?')">
+                                            <i class="bi bi-x-circle"></i> Отменить
+                                        </button>
+                                    </form>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
