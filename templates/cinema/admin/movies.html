@@ -35,6 +35,8 @@
                             <td>
                                 {% if movie.poster %}
                                     <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" style="width: 50px; height: 75px; object-fit: cover; border-radius: 5px;">
+                                {% elif movie.poster_url %}
+                                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" style="width: 50px; height: 75px; object-fit: cover; border-radius: 5px;">
                                 {% else %}
                                     <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 75px; border-radius: 5px;">
                                         <i class="bi bi-film text-white"></i>
