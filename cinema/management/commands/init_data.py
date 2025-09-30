@@ -226,22 +226,30 @@ class Command(BaseCommand):
 
         # Создание сеансов
         self.stdout.write('Создание сеансов...')
-        today = timezone.now()
-        for hall in halls[:6]:  # Только первые 6 залов
-            for movie in movies[:3]:  # Только первые 3 фильма
+        now = timezone.now()
+        today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        for hall in halls:  # Все залы
+            for movie in movies:  # Все фильмы
                 for day in range(7):  # На неделю вперед
-                    for hour in [10, 14, 18, 21]:
-                        showtime_date = today + timedelta(days=day, hours=hour-today.hour)
+                    for hour in [10, 13, 16, 19, 21]:
+                        # Вычисляем дату и время сеанса
+                        showtime_date = today + timedelta(days=day, hours=hour)
+                        
+                        # Пропускаем прошедшие сеансы
+                        if showtime_date <= now:
+                            continue
+                        
                         showtime, created = ShowTime.objects.get_or_create(
                             movie=movie,
                             hall=hall,
                             start_time=showtime_date,
                             defaults={
-                                'price': 300 + (day * 50),
+                                'price': 300.00,
                                 'is_active': True
                             }
                         )
-                        if created and day == 0 and hour == 10:
+                        if created:
                             self.stdout.write(self.style.SUCCESS(f'✓ Создан сеанс: {movie.title} в {hall}'))
 
         # Создание акций
