@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ promotion.title }} - КиноМир{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            {% if promotion.image %}
+                <img src="{{ promotion.image.url }}" class="card-img-top" alt="{{ promotion.title }}" style="max-height: 400px; object-fit: cover;">
+            {% else %}
+                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 400px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                    <i class="bi bi-gift text-white" style="font-size: 8rem;"></i>
+                </div>
+            {% endif %}
+            
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2 class="fw-bold">{{ promotion.title }}</h2>
+                    {% if promotion.discount_percent > 0 %}
+                        <span class="badge bg-danger fs-5">-{{ promotion.discount_percent }}%</span>
+                    {% endif %}
+                </div>
+                
+                <div class="alert alert-primary mb-4">
+                    <i class="bi bi-calendar-range"></i>
+                    <strong>Срок действия:</strong> с {{ promotion.start_date }} по {{ promotion.end_date }}
+                </div>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3">Описание</h5>
+                    <p class="text-secondary" style="white-space: pre-line;">{{ promotion.description }}</p>
+                </div>
+                
+                <a href="{% url 'cinema:schedule' %}" class="btn btn-primary">
+                    <i class="bi bi-ticket-perforated"></i> Выбрать сеанс
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Акции - КиноМир{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold mb-4"><i class="bi bi-gift"></i> Текущие акции</h1>
+
+{% if promotions %}
+    <div class="row g-4">
+        {% for promotion in promotions %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                {% if promotion.image %}
+                    <img src="{{ promotion.image.url }}" class="card-img-top" alt="{{ promotion.title }}" style="height: 250px;">
+                {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 250px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        <i class="bi bi-gift text-white" style="font-size: 5rem;"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold">{{ promotion.title }}</h5>
+                        {% if promotion.discount_percent > 0 %}
+                            <span class="badge bg-danger">-{{ promotion.discount_percent }}%</span>
+                        {% endif %}
+                    </div>
+                    <p class="card-text text-secondary mb-3">{{ promotion.description|truncatewords:30 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-secondary">
+                            <i class="bi bi-calendar"></i> До {{ promotion.end_date }}
+                        </small>
+                        <a href="{% url 'cinema:promotion_detail' promotion.id %}" class="btn btn-sm btn-primary">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> На данный момент нет активных акций. Следите за обновлениями!
+    </div>
+{% endif %}
+{% endblock %}

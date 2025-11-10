@@ -1,0 +1,62 @@
+#!/usr/bin/expect -f
+set timeout 60
+set password "R41VjU7HlyE*"
+set server "root@212.67.9.187"
+
+# Копируем файлы
+puts "Копирование файлов на сервер..."
+spawn scp -o StrictHostKeyChecking=no cinema/models.py cinema/forms.py cinema/views.py cinema/urls.py cinema/admin.py $server:/root/kino/cinema/
+expect {
+    "password:" { send "$password\r"; exp_continue }
+    "Password:" { send "$password\r"; exp_continue }
+    eof
+}
+
+spawn scp -o StrictHostKeyChecking=no kino_project/settings.py $server:/root/kino/kino_project/
+expect {
+    "password:" { send "$password\r"; exp_continue }
+    "Password:" { send "$password\r"; exp_continue }
+    eof
+}
+
+spawn scp -o StrictHostKeyChecking=no templates/cinema/password_reset_request.html templates/cinema/password_reset_confirm.html templates/cinema/login.html $server:/root/kino/templates/cinema/
+expect {
+    "password:" { send "$password\r"; exp_continue }
+    "Password:" { send "$password\r"; exp_continue }
+    eof
+}
+
+puts "Выполнение команд на сервере..."
+spawn ssh -o StrictHostKeyChecking=no $server
+expect {
+    "password:" { send "$password\r" }
+    "Password:" { send "$password\r" }
+}
+
+expect "# "
+send "cd /root/kino\r"
+expect "# "
+
+send "source venv/bin/activate 2>/dev/null || python3 -m venv venv && source venv/bin/activate\r"
+expect "# "
+
+send "pip install -q -r requirements.txt\r"
+expect "# "
+
+send "python manage.py makemigrations\r"
+expect "# "
+
+send "python manage.py migrate\r"
+expect "# "
+
+send "python manage.py collectstatic --noinput\r"
+expect "# "
+
+send "systemctl restart gunicorn 2>/dev/null || systemctl restart django 2>/dev/null || pkill -f gunicorn && nohup gunicorn kino_project.wsgi:application --bind 0.0.0.0:8000 &\r"
+expect "# "
+
+send "exit\r"
+expect eof
+
+puts "Деплой завершен!"
+

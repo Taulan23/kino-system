@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python3 manage.py migrate && python3 manage.py collectstatic --noinput && gunicorn kino_project.wsgi --bind 0.0.0.0:$PORT"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10

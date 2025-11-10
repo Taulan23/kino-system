@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать пользователя - Админ-панель{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold mb-4">Редактировать пользователя</h1>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Редактирование: {{ edited_user.username }}</h5>
+                <p class="text-secondary mb-4">
+                    Зарегистрирован: {{ edited_user.date_joined|date:"d.m.Y H:i" }}
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ edited_user.email }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ edited_user.phone|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль пользователя</label>
+                        <select name="role" id="role" class="form-select">
+                            <option value="user" {% if edited_user.role == 'user' %}selected{% endif %}>Зритель</option>
+                            <option value="staff" {% if edited_user.role == 'staff' %}selected{% endif %}>Сотрудник</option>
+                            <option value="admin" {% if edited_user.role == 'admin' %}selected{% endif %}>Администратор</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if edited_user.is_active %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            Аккаунт активен
+                        </label>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-save"></i> Сохранить
+                        </button>
+                        <a href="{% url 'cinema:admin_users' %}" class="btn btn-outline-secondary">
+                            Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

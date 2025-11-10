@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои билеты - КиноМир{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold mb-4"><i class="bi bi-ticket-perforated"></i> Мои билеты</h1>
+
+{% if tickets %}
+    <div class="row g-4">
+        {% for ticket in tickets %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="fw-bold">{{ ticket.showtime.movie.title }}</h5>
+                        <span class="badge 
+                            {% if ticket.status == 'paid' %}bg-success
+                            {% elif ticket.status == 'booked' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {% if ticket.status == 'paid' %}Оплачен
+                            {% elif ticket.status == 'booked' %}Забронирован
+                            {% else %}Отменен{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- QR Code for active tickets -->
+                    {% if ticket.status == 'paid' and ticket.showtime.start_time > now %}
+                    <div class="text-center mb-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TICKET-{{ ticket.id }}-{{ ticket.user.id }}-{{ ticket.showtime.id }}" 
+                             alt="QR Code" 
+                             class="img-fluid rounded"
+                             style="max-width: 150px;">
+                        <div class="small text-secondary mt-1">ID: {{ ticket.id }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <i class="bi bi-building"></i> {{ ticket.showtime.hall.cinema.name }}
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-calendar"></i> {{ ticket.showtime.start_time|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-grid-3x3"></i> Ряд {{ ticket.row }}, Место {{ ticket.seat }}
+                    </div>
+                    <div class="mb-3">
+                        <i class="bi bi-cash"></i> {{ ticket.price }} ₽
+                    </div>
+                    
+                    <small class="text-secondary">
+                        Куплен: {{ ticket.booking_date|date:"d.m.Y H:i" }}
+                    </small>
+                    
+                    {% if ticket.status == 'paid' and ticket.showtime.start_time > now %}
+                        <form method="post" action="{% url 'cinema:cancel_ticket' ticket.id %}" class="mt-3">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" 
+                                    onclick="return confirm('Вы уверены, что хотите отменить билет?')">
+                                <i class="bi bi-x-circle"></i> Отменить билет
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> У вас пока нет купленных билетов.
+        <a href="{% url 'cinema:schedule' %}" class="alert-link">Выбрать фильм</a>
+    </div>
+{% endif %}
+{% endblock %}

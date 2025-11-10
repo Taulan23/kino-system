@@ -1,0 +1,14 @@
+#!/usr/bin/expect -f
+set timeout 20
+spawn ssh root@212.67.9.187 "echo 'Connection OK'; which psql && psql --version || echo 'PostgreSQL not installed'; ps aux | grep postgres | head -5; ls -la /etc/postgresql/ 2>/dev/null || echo 'No postgresql config'; sudo -u postgres psql -c '\l' 2>/dev/null || echo 'Cannot list databases'"
+expect {
+    "password:" {
+        send "R41VjU7HlyE*\r"
+        exp_continue
+    }
+    "Password:" {
+        send "R41VjU7HlyE*\r"
+        exp_continue
+    }
+    eof
+}

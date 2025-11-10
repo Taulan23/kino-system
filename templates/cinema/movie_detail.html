@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ movie.title }} - КиноМир{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Movie Poster -->
+    <div class="col-md-4">
+        <div class="card">
+            {% if movie.poster %}
+                <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
+            {% else %}
+                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 600px;">
+                    <i class="bi bi-film text-white" style="font-size: 8rem;"></i>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Movie Info -->
+    <div class="col-md-8">
+        <h1 class="fw-bold mb-3">{{ movie.title }}</h1>
+        
+        <div class="d-flex gap-2 mb-3">
+            <span class="badge bg-primary">{{ movie.age_restriction }}</span>
+            {% for genre in movie.genres.all %}
+                <span class="badge bg-secondary">{{ genre.name }}</span>
+            {% endfor %}
+        </div>
+        
+        <div class="d-flex gap-4 mb-4">
+            <div>
+                <div class="rating-stars mb-1">
+                    <i class="bi bi-star-fill"></i> {{ average_rating|default:movie.rating }}
+                </div>
+                <small class="text-secondary">Рейтинг</small>
+            </div>
+            <div>
+                <div class="fw-bold mb-1">{{ movie.duration }} мин</div>
+                <small class="text-secondary">Длительность</small>
+            </div>
+            <div>
+                <div class="fw-bold mb-1">{{ movie.release_date }}</div>
+                <small class="text-secondary">Дата выхода</small>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <h5 class="fw-bold mb-2">Описание</h5>
+            <p class="text-secondary">{{ movie.description }}</p>
+        </div>
+        
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <strong>Режиссер:</strong> {{ movie.director }}
+            </div>
+            <div class="col-md-6">
+                <strong>В ролях:</strong> {{ movie.cast }}
+            </div>
+        </div>
+        
+        {% if movie.trailer_url %}
+        <a href="{{ movie.trailer_url }}" target="_blank" class="btn btn-outline-primary mb-4">
+            <i class="bi bi-play-circle"></i> Смотреть трейлер
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Showtimes -->
+{% if showtimes %}
+<section class="mt-5">
+    <h3 class="fw-bold mb-4"><i class="bi bi-calendar-check"></i> Ближайшие сеансы</h3>
+    <div class="row g-3">
+        {% for showtime in showtimes %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="fw-bold">{{ showtime.hall.cinema.name }}</h6>
+                    <p class="text-secondary small mb-2">{{ showtime.hall.name }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ showtime.start_time|date:"d.m.Y H:i" }}</div>
+                            <div class="text-secondary small">{{ showtime.price }} ₽</div>
+                        </div>
+                        <a href="{% url 'cinema:book_ticket' showtime.id %}" class="btn btn-sm btn-primary">
+                            Купить билет
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'cinema:schedule' %}" class="btn btn-outline-primary mt-3">
+        Все сеансы <i class="bi bi-arrow-right"></i>
+    </a>
+</section>
+{% endif %}
+
+<!-- Reviews -->
+<section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold"><i class="bi bi-chat-left-text"></i> Отзывы</h3>
+        {% if user.is_authenticated and not user_review %}
+            <a href="{% url 'cinema:add_review' movie.id %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Написать отзыв
+            </a>
+        {% endif %}
+    </div>
+    
+    {% if reviews %}
+        {% for review in reviews %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ review.user.username }}</h6>
+                        <div class="rating-stars small">
+                            <i class="bi bi-star-fill"></i> {{ review.rating }}/10
+                        </div>
+                    </div>
+                    <small class="text-secondary">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <p class="text-secondary mb-0">{{ review.text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Пока нет отзывов. Будьте первым!
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

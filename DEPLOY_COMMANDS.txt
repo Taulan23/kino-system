@@ -1,0 +1,44 @@
+КОМАНДЫ ДЛЯ ДЕПЛОЯ НА СЕРВЕР
+================================
+
+1. Загрузите файл deploy_files.tar.gz на сервер через веб-FTP или панель управления
+
+2. Подключитесь к серверу через веб-терминал или SSH
+
+3. Выполните следующие команды:
+
+cd /root/kino
+# или если проект в другой директории:
+# cd /opt/kino
+
+# Распакуйте архив
+tar -xzf deploy_files.tar.gz
+
+# Активируйте виртуальное окружение
+source venv/bin/activate
+
+# Создайте миграции для новой модели PasswordResetToken
+python manage.py makemigrations
+
+# Примените миграции
+python manage.py migrate
+
+# Соберите статические файлы
+python manage.py collectstatic --noinput
+
+# Перезапустите сервер (выберите один из вариантов)
+systemctl restart gunicorn
+# или
+systemctl restart django
+# или
+pkill -f gunicorn && nohup gunicorn kino_project.wsgi:application --bind 0.0.0.0:8000 &
+
+4. Проверьте что сервер запущен:
+ps aux | grep gunicorn
+
+5. Откройте в браузере и протестируйте:
+- http://212.67.9.187/login/ - должна быть ссылка "Забыли пароль?"
+- http://212.67.9.187/password-reset/ - форма восстановления пароля
+- http://212.67.9.187/register/ - проверьте валидацию email и телефона
+
+

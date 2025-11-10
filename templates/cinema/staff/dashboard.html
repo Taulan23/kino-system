@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель сотрудника - КиноМир{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold"><i class="bi bi-briefcase"></i> Панель сотрудника</h1>
+    <div class="btn-group">
+        <a href="{% url 'cinema:staff_reviews' %}" class="btn btn-outline-primary">
+            <i class="bi bi-chat-square-text"></i> Модерация отзывов
+        </a>
+        <a href="{% url 'cinema:index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-house"></i> На главную
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-check text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ showtimes.count }}</h3>
+                <p class="text-secondary mb-0">Сеансов сегодня</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-ticket-perforated text-success" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">{{ today_tickets }}</h3>
+                <p class="text-secondary mb-0">Продано билетов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-clock-history text-warning" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-2">Активен</h3>
+                <p class="text-secondary mb-0">Статус</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Showtimes -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="fw-bold mb-0">Сеансы сегодня</h5>
+    </div>
+    <div class="card-body">
+        {% if showtimes %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Время</th>
+                            <th>Фильм</th>
+                            <th>Зал</th>
+                            <th>Кинотеатр</th>
+                            <th>Занято мест</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for showtime in showtimes %}
+                        <tr>
+                            <td class="fw-bold">{{ showtime.start_time|date:"H:i" }}</td>
+                            <td>{{ showtime.movie.title }}</td>
+                            <td>{{ showtime.hall.name }}</td>
+                            <td>{{ showtime.hall.cinema.name }}</td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    {{ showtime.hall.total_seats|add:"-"|add:showtime.get_available_seats }} / {{ showtime.hall.total_seats }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'cinema:staff_seats' showtime.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-grid-3x3"></i> Места
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> На сегодня сеансов нет.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

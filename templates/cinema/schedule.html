@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Расписание - КиноМир{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold mb-4"><i class="bi bi-calendar-check"></i> Расписание сеансов</h1>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Фильм</label>
+                <select name="movie" class="form-select">
+                    <option value="">Все фильмы</option>
+                    {% for movie in movies %}
+                        <option value="{{ movie.id }}" {% if selected_movie == movie.id|stringformat:'s' %}selected{% endif %}>
+                            {{ movie.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Кинотеатр</label>
+                <select name="cinema" class="form-select">
+                    <option value="">Все кинотеатры</option>
+                    {% for cinema in cinemas %}
+                        <option value="{{ cinema.id }}" {% if selected_cinema == cinema.id|stringformat:'s' %}selected{% endif %}>
+                            {{ cinema.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Дата</label>
+                <input type="date" name="date" class="form-control" value="{{ selected_date|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Показать
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Date Navigation -->
+<div class="mb-4">
+    <div class="d-flex gap-2 flex-wrap">
+        {% for date in dates %}
+            <a href="?date={{ date|date:'Y-m-d' }}{% if selected_movie %}&movie={{ selected_movie }}{% endif %}{% if selected_cinema %}&cinema={{ selected_cinema }}{% endif %}" 
+               class="btn {% if date == selected_date %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {{ date|date:"d.m (D)" }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Showtimes -->
+{% if showtimes %}
+    {% regroup showtimes by movie as movie_list %}
+    {% for movie_group in movie_list %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        {% if movie_group.grouper.poster %}
+                            <img src="{{ movie_group.grouper.poster.url }}" class="img-fluid rounded" alt="{{ movie_group.grouper.title }}">
+                        {% elif movie_group.grouper.poster_url %}
+                            <img src="{{ movie_group.grouper.poster_url }}" class="img-fluid rounded" alt="{{ movie_group.grouper.title }}">
+                        {% else %}
+                            <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                                <i class="bi bi-film text-white" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-10">
+                        <h4 class="fw-bold mb-2">{{ movie_group.grouper.title }}</h4>
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="badge bg-primary">{{ movie_group.grouper.age_restriction }}</span>
+                            {% for genre in movie_group.grouper.genres.all %}
+                                <span class="badge bg-secondary">{{ genre.name }}</span>
+                            {% endfor %}
+                            <span class="text-secondary"><i class="bi bi-clock"></i> {{ movie_group.grouper.duration }} мин</span>
+                        </div>
+                        
+                        {% regroup movie_group.list by hall.cinema as cinema_list %}
+                        {% for cinema_group in cinema_list %}
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary mb-2">{{ cinema_group.grouper.name }}</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    {% for showtime in cinema_group.list %}
+                                        <a href="{% url 'cinema:book_ticket' showtime.id %}" class="btn btn-outline-primary">
+                                            {{ showtime.start_time|date:"H:i" }} 
+                                            <small class="text-secondary">({{ showtime.price }} ₽)</small>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> На выбранную дату сеансов не найдено.
+    </div>
+{% endif %}
+{% endblock %}

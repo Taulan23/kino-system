@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль - КиноМир{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+                </div>
+                <h5 class="fw-bold">{{ user.username }}</h5>
+                <p class="text-secondary mb-0">{{ user.get_role_display }}</p>
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'cinema:edit_profile' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Редактировать
+                    </a>
+                    <a href="{% url 'cinema:change_password' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-key"></i> Сменить пароль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4">Личная информация</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Имя пользователя</div>
+                        <div class="fw-bold">{{ user.username }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Email</div>
+                        <div class="fw-bold">{{ user.email|default:"Не указан" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Имя</div>
+                        <div class="fw-bold">{{ user.first_name|default:"Не указано" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Фамилия</div>
+                        <div class="fw-bold">{{ user.last_name|default:"Не указана" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Телефон</div>
+                        <div class="fw-bold">{{ user.phone|default:"Не указан" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Дата рождения</div>
+                        <div class="fw-bold">{{ user.birth_date|default:"Не указана" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Город</div>
+                        <div class="fw-bold">{{ user.city.name|default:"Не выбран" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Дата регистрации</div>
+                        <div class="fw-bold">{{ user.date_joined|date:"d.m.Y" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="{% url 'cinema:my_tickets' %}" class="card text-decoration-none">
+                    <div class="card-body text-center">
+                        <i class="bi bi-ticket-perforated text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="fw-bold mt-3 mb-0">Мои билеты</h5>
+                        <p class="text-secondary mb-0">Просмотр купленных билетов</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'cinema:my_reviews' %}" class="card text-decoration-none">
+                    <div class="card-body text-center">
+                        <i class="bi bi-chat-left-text text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="fw-bold mt-3 mb-0">Мои отзывы</h5>
+                        <p class="text-secondary mb-0">Управление отзывами</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

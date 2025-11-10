@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cinema.name }} - КиноМир{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    {% if cinema.image %}
+        <img src="{{ cinema.image.url }}" class="card-img-top" alt="{{ cinema.name }}" style="height: 400px; object-fit: cover;">
+    {% elif cinema.image_url %}
+        <img src="{{ cinema.image_url }}" class="card-img-top" alt="{{ cinema.name }}" style="height: 400px; object-fit: cover;">
+    {% endif %}
+    <div class="card-body">
+        <h1 class="fw-bold mb-4">{{ cinema.name }}</h1>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-3">Контактная информация</h5>
+                <div class="mb-2">
+                    <i class="bi bi-geo-alt text-primary"></i>
+                    <strong>Адрес:</strong> {{ cinema.address }}
+                </div>
+                <div class="mb-2">
+                    <i class="bi bi-telephone text-primary"></i>
+                    <strong>Телефон:</strong> {{ cinema.phone }}
+                </div>
+                <div class="mb-2">
+                    <i class="bi bi-pin-map text-primary"></i>
+                    <strong>Город:</strong> {{ cinema.city.name }}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-3">Залы</h5>
+                {% for hall in halls %}
+                    <div class="mb-2">
+                        <strong>{{ hall.name }}</strong> - {{ hall.total_seats }} мест
+                        ({{ hall.rows }} рядов × {{ hall.seats_per_row }} мест)
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if cinema.description %}
+            <h5 class="fw-bold mb-3">Описание</h5>
+            <p class="text-secondary mb-4">{{ cinema.description }}</p>
+        {% endif %}
+        
+        {% if cinema.facilities %}
+            <h5 class="fw-bold mb-3">Удобства</h5>
+            <p class="text-secondary">{{ cinema.facilities }}</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if showtimes %}
+<div class="card">
+    <div class="card-body">
+        <h4 class="fw-bold mb-4">Ближайшие сеансы</h4>
+        
+        <div class="row g-3">
+            {% for showtime in showtimes %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold">{{ showtime.movie.title }}</h6>
+                        <p class="text-secondary small mb-2">{{ showtime.hall.name }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">{{ showtime.start_time|date:"d.m H:i" }}</div>
+                                <div class="text-secondary small">{{ showtime.price }} ₽</div>
+                            </div>
+                            <a href="{% url 'cinema:book_ticket' showtime.id %}" class="btn btn-sm btn-primary">
+                                Купить
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <a href="{% url 'cinema:schedule' %}?cinema={{ cinema.id }}" class="btn btn-outline-primary mt-3">
+            Полное расписание <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
